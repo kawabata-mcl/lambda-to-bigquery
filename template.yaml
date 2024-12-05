@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda function to insert data into Google BigQuery
+
+Parameters:
+  ParameterName:
+    Type: String
+    Default: /gcp/bigquery/credentials
+    Description: SSM Parameter name for GCP credentials
+
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 128
+    Runtime: python3.12
+
+Resources:
+  BigQueryLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: bigquery-layer
+      Description: Layer for google-cloud-bigquery
+      ContentUri: layer/
+      CompatibleRuntimes:
+        - python3.12
+      RetentionPolicy: Retain
+
+  LambdaToBigQuery:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: lambda-to-bigquery
+      CodeUri: src/
+      Handler: lambda_function.lambda_handler
+      Layers:
+        - !Ref BigQueryLayer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+              Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${ParameterName}'
+      Environment:
+        Variables:
+          PARAMETER_NAME: !Ref ParameterName

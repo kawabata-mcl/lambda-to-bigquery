@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# SAM build
+.aws-sam/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# SAM config
+samconfig.toml
+
+# AWS CLI test
+response.json
+
+# Lambda Layer
+layer/
